@@ -15,6 +15,7 @@ from cloudbot.client import Client
 from cloudbot.config import Config
 from cloudbot.reloader import PluginReloader
 from cloudbot.plugin import PluginManager
+from cloudbot.tracker import Tracker
 from cloudbot.event import Event, CommandEvent, RegexEvent, EventType
 from cloudbot.util import botvars, formatting
 from cloudbot.clients.irc import IrcClient
@@ -104,6 +105,8 @@ class CloudBot:
             self.reloader = PluginReloader(self)
 
         self.plugin_manager = PluginManager(self)
+
+        self.tracker = Tracker(self)
 
     def run(self):
         """
@@ -202,6 +205,9 @@ class CloudBot:
         run_before_tasks = []
         tasks = []
         command_prefix = event.conn.config.get('command_prefix', '.')
+
+        # Call before any plugins, so that everything is set up
+        self.tracker.track(event)
 
         # Raw IRC hook
         for raw_hook in self.plugin_manager.catch_all_triggers:
